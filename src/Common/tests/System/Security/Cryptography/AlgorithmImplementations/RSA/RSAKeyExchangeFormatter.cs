@@ -24,6 +24,7 @@ namespace System.Security.Cryptography.Rsa.Tests
         }
 
         [Fact]
+        [ActiveIssue(19436)]
         public static void VerifyDecryptKeyExchangePkcs1()
         {
             using (RSA rsa = RSAFactory.Create())
@@ -77,20 +78,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             Assert.Equal(TestData.HelloBytes, decrypted);
 
             encrypted[encrypted.Length - 1] ^= 0xff;
-
-            try
-            {
-                deformatter.DecryptKeyExchange(encrypted);
-                string msg = $"Decrypt was unexpectedly successful: {encrypted.ByteArrayToHex()}";
-
-                // Just in case the exception text gets trimmed from test logs, Console.WriteLine it.
-                Console.WriteLine(msg);
-                throw new InvalidOperationException(msg);
-            }
-            catch (CryptographicException)
-            {
-                // Equivalent to Assert.ThrowsAny<CryptographicException>
-            }
+            Assert.ThrowsAny<CryptographicException>(() => deformatter.DecryptKeyExchange(encrypted));
         }
     }
 }
